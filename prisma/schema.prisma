@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  password       String
+  name           String
+  role           Role     @default(SUPPLIER_EMPLOYEE)
+  isCompanyAdmin Boolean  @default(false)
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id])
+  createdAt      DateTime @default(now())
+
+  createdAnnouncements Announcement[]   @relation("AnnouncementCreator")
+  submittedOffers      Offer[]          @relation("OfferSubmitter")
+  offerComments        OfferComment[]
+  notifications        Notification[]
+}
+
+enum Role {
+  ADMIN
+  SUPPLIER_EMPLOYEE
+  LOGISTICS_EMPLOYEE
+}
+
+model Company {
+  id            String         @id @default(cuid())
+  name          String
+  type          CompanyType
+  email         String
+  phone         String
+  address       String
+  logo          String?
+  isVerified    Boolean        @default(false)
+  isActive      Boolean        @default(true)
+  users         User[]
+  announcements Announcement[]
+  offers        Offer[]
+  createdAt     DateTime       @default(now())
+}
+
+enum CompanyType {
+  SUPPLIER
+  LOGISTICS
+}
+
+model Announcement {
+  id          String             @id @default(cuid())
+  title       String
+  description String
+  cargoType   String
+  weight      Float
+  volume      Float?
+  origin      String
+  destination String
+  deadline    DateTime
+  status      AnnouncementStatus @default(ACTIVE)
+  supplierId  String
+  supplier    Company            @relation(fields: [supplierId], references: [id])
+  offers      Offer[]
+  createdById String?
+  createdBy   User?              @relation("AnnouncementCreator", fields: [createdById], references: [id])
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+enum AnnouncementStatus {
+  ACTIVE
+  CLOSED
+  CANCELLED
+}
+
+model Offer {
+  id                 String         @id @default(cuid())
+  announcementId     String
+  announcement       Announcement   @relation(fields: [announcementId], references: [id])
+  logisticsCompanyId String
+  logisticsCompany   Company        @relation(fields: [logisticsCompanyId], references: [id])
+  notes              String?
+  status             OfferStatus    @default(PENDING)
+  items              OfferItem[]
+  shipment           Shipment?
+  comments           OfferComment[]
+  submittedById      String?
+  submittedBy        User?          @relation("OfferSubmitter", fields: [submittedById], references: [id])
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@unique([announcementId, logisticsCompanyId])
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model OfferItem {
+  id            String        @id @default(cuid())
+  offerId       String
+  offer         Offer         @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  transportType TransportType
+  price         Float
+  currency      String        @default("USD")
+  deliveryDays  Int
+  notes         String?
+}
+
+enum TransportType {
+  AIR
+  SEA
+  RAIL
+  ROAD
+}
+
+model OfferComment {
+  id        String   @id @default(cuid())
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  relatedId String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+enum NotificationType {
+  NEW_OFFER
+  OFFER_ACCEPTED
+  OFFER_REJECTED
+  NEW_COMMENT
+}
+
+model Shipment {
+  id         String              @id @default(cuid())
+  offerId    String              @unique
+  offer      Offer               @relation(fields: [offerId], references: [id])
+  status     ShipmentStatus      @default(BOOKED)
+  milestones ShipmentMilestone[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+}
+
+enum ShipmentStatus {
+  BOOKED
+  PICKED_UP
+  IN_TRANSIT
+  CUSTOMS_CLEARANCE
+  OUT_FOR_DELIVERY
+  DELIVERED
+}
+
+model ShipmentMilestone {
+  id         String         @id @default(cuid())
+  shipmentId String
+  shipment   Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status     ShipmentStatus
+  note       String?
+  location   String?
+  createdAt  DateTime       @default(now())
+}
