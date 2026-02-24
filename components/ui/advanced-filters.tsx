@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, X, Filter, Calendar } from "lucide-react"
+import { Search, X, Filter } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select"
-import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 export interface FilterOption {

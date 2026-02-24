@@ -1,9 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
 import { StarRating } from "@/components/ui/star-rating"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,16 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
-
-const reviewSchema = z.object({
-  rating: z.number().min(1).max(5),
-  serviceQuality: z.number().min(1).max(5),
-  communication: z.number().min(1).max(5),
-  timeliness: z.number().min(1).max(5),
-  comment: z.string().optional(),
-})
-
-type ReviewFormData = z.infer<typeof reviewSchema>
 
 interface ReviewFormProps {
   companyId: string
