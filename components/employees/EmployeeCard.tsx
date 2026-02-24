@@ -49,7 +49,7 @@ export function EmployeeCard({ employee, locale }: EmployeeCardProps) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-slate-900 truncate">{employee.name}</h3>
+              <h3 className="font-semibold text-slate-900 truncate w-full">{employee.name}</h3>
               <Badge
                 variant={employee.isCompanyAdmin ? 'default' : 'secondary'}
                 className={employee.isCompanyAdmin ? 'bg-blue-600 text-white text-xs' : 'text-xs'}

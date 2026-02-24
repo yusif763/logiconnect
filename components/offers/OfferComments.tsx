@@ -94,7 +94,7 @@ export function OfferComments({ offerId, myCompanyId }: OfferCommentsProps) {
 
       {/* Chat area */}
       <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
-        <div className="h-56 overflow-y-auto p-3 space-y-3">
+        <div className="h-56 overflow-y-auto p-3 space-y-3 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
           {loading ? (
             <div className="flex justify-center items-center h-full">
               <Loader2 className="h-5 w-5 animate-spin text-slate-400" />

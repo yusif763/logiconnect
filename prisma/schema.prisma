@@ -22,6 +22,7 @@ model User {
   submittedOffers      Offer[]          @relation("OfferSubmitter")
   offerComments        OfferComment[]
   notifications        Notification[]
+  reviews              Review[]
 }
 
 enum Role {
@@ -43,6 +44,7 @@ model Company {
   users         User[]
   announcements Announcement[]
   offers        Offer[]
+  reviews       Review[]
   createdAt     DateTime       @default(now())
 }
 
@@ -176,4 +178,21 @@ model ShipmentMilestone {
   note       String?
   location   String?
   createdAt  DateTime       @default(now())
+}
+
+model Review {
+  id                 String   @id @default(cuid())
+  logisticsCompanyId String
+  logisticsCompany   Company  @relation(fields: [logisticsCompanyId], references: [id], onDelete: Cascade)
+  reviewerId         String
+  reviewer           User     @relation(fields: [reviewerId], references: [id])
+  rating             Int      // 1-5 stars
+  comment            String?
+  serviceQuality     Int      // 1-5
+  communication      Int      // 1-5
+  timeliness         Int      // 1-5
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([logisticsCompanyId, reviewerId])
 }

@@ -70,8 +70,8 @@ export default function OfferDetailPage() {
   if (!offer) return <p>Not found</p>
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <Button asChild variant="ghost" size="sm">
           <Link href={`/${locale}/offers`}>
             <ArrowLeft className="h-4 w-4 mr-1.5" />
@@ -86,7 +86,7 @@ export default function OfferDetailPage() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>

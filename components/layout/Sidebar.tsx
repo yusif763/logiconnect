@@ -107,23 +107,24 @@ export function Sidebar({ role, locale, isCompanyAdmin = false }: SidebarProps) 
   const filteredAdmin = adminItems.filter(item => item.roles.includes(role))
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-white w-64">
-      <div className="flex items-center gap-2 p-6 border-b border-slate-700">
-        <Package className="h-6 w-6 text-blue-400" />
-        <span className="font-bold text-lg">LogiConnect</span>
+    <div className="flex flex-col h-full bg-slate-900 text-white w-64 custom-scrollbar overflow-y-auto">
+      <div className="flex items-center gap-2 p-6 border-b border-slate-700 bg-gradient-to-r from-blue-600 to-blue-700">
+        <Package className="h-6 w-6 text-white" />
+        <span className="font-bold text-lg text-white">LogiConnect</span>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
-        {filteredNav.map((item) => (
+      <nav className="flex-1 p-4 space-y-1 animate-slide-up">
+        {filteredNav.map((item, index) => (
           <Link
             key={item.href}
             href={`/${locale}${item.href}`}
             className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover-lift',
               isActive(item.href)
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-white shadow-lg'
                 : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             )}
+            style={{ animationDelay: `${index * 50}ms` }}
           >
             <item.icon className="h-5 w-5 shrink-0" />
             {item.label}
@@ -137,16 +138,17 @@ export function Sidebar({ role, locale, isCompanyAdmin = false }: SidebarProps) 
                 Administration
               </p>
             </div>
-            {filteredAdmin.map((item) => (
+            {filteredAdmin.map((item, index) => (
               <Link
                 key={item.href}
                 href={`/${locale}${item.href}`}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover-lift',
                   isActive(item.href)
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-white shadow-lg'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 )}
+                style={{ animationDelay: `${(filteredNav.length + index) * 50}ms` }}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
                 {item.label}
