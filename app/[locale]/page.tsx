@@ -54,7 +54,7 @@ export default async function LandingPage({
             </Button>
           </Link>
           <Link href={`/${locale}/register/logistics`}>
-            <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full bg-[transparent] sm:w-auto">
               {ta('registerLogistics')}
             </Button>
           </Link>
@@ -117,7 +117,7 @@ export default async function LandingPage({
       </section>
 
       <footer className="border-t border-white/10 py-8 text-center text-slate-500 text-sm">
-        © 2024 LogiConnect. All rights reserved.
+        {t('copyright')}
       </footer>
     </div>
   )

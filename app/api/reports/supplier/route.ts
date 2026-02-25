@@ -15,20 +15,56 @@ export async function GET(request: NextRequest) {
         ? (new URL(request.url).searchParams.get('companyId') || session.user.companyId)
         : session.user.companyId
 
+    // Optimized: Use separate queries instead of nested includes for better performance
     const announcements = await prisma.announcement.findMany({
       where: { supplierId: companyId },
-      include: {
-        offers: {
-          include: {
-            logisticsCompany: { select: { id: true, name: true } },
-            items: true,
-            submittedBy: { select: { name: true } },
-          },
-          orderBy: { createdAt: 'asc' },
-        },
+      select: {
+        id: true,
+        title: true,
+        cargoType: true,
+        origin: true,
+        destination: true,
+        status: true,
+        deadline: true,
+        createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
     })
+
+    // Get offer details only for announcements that have offers
+    const offers = await prisma.offer.findMany({
+      where: {
+        announcementId: { in: announcements.map((a) => a.id) },
+      },
+      select: {
+        id: true,
+        status: true,
+        announcementId: true,
+        createdAt: true,
+        notes: true,
+        logisticsCompanyId: true,
+        logisticsCompany: { select: { id: true, name: true } },
+        submittedBy: { select: { name: true } },
+        items: {
+          select: {
+            transportType: true,
+            price: true,
+            currency: true,
+            deliveryDays: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    // Group offers by announcement
+    const announcementOffersMap = new Map<string, typeof offers>()
+    for (const offer of offers) {
+      if (!announcementOffersMap.has(offer.announcementId)) {
+        announcementOffersMap.set(offer.announcementId, [])
+      }
+      announcementOffersMap.get(offer.announcementId)!.push(offer)
+    }
 
     // ── Basic counters ────────────────────────────────────────────
     const totalAnnouncements = announcements.length
@@ -36,11 +72,10 @@ export async function GET(request: NextRequest) {
     const closedAnnouncements = announcements.filter((a) => a.status === 'CLOSED').length
     const cancelledAnnouncements = announcements.filter((a) => a.status === 'CANCELLED').length
 
-    const allOffers = announcements.flatMap((a) => a.offers)
-    const totalOffers = allOffers.length
-    const acceptedOffers = allOffers.filter((o) => o.status === 'ACCEPTED').length
-    const rejectedOffers = allOffers.filter((o) => o.status === 'REJECTED').length
-    const pendingOffers = allOffers.filter((o) => o.status === 'PENDING').length
+    const totalOffers = offers.length
+    const acceptedOffers = offers.filter((o) => o.status === 'ACCEPTED').length
+    const rejectedOffers = offers.filter((o) => o.status === 'REJECTED').length
+    const pendingOffers = offers.filter((o) => o.status === 'PENDING').length
 
     const avgOffersPerAnnouncement =
       totalAnnouncements > 0 ? +(totalOffers / totalAnnouncements).toFixed(1) : 0
@@ -56,7 +91,8 @@ export async function GET(request: NextRequest) {
     let acceptedPriceCount = 0
 
     for (const ann of announcements) {
-      const allItems = ann.offers.flatMap((o) => o.items)
+      const annOffers = announcementOffersMap.get(ann.id) || []
+      const allItems = annOffers.flatMap((o) => o.items)
       if (allItems.length === 0) continue
 
       const prices = allItems.map((i) => i.price).sort((a, b) => a - b)
@@ -64,7 +100,7 @@ export async function GET(request: NextRequest) {
       const medianPrice =
         prices.length % 2 === 0 ? (prices[mid - 1] + prices[mid]) / 2 : prices[mid]
 
-      const accepted = ann.offers.find((o) => o.status === 'ACCEPTED')
+      const accepted = annOffers.find((o) => o.status === 'ACCEPTED')
       const acceptedPrice = accepted
         ? accepted.items.reduce((s, i) => s + i.price, 0)
         : null
@@ -104,7 +140,7 @@ export async function GET(request: NextRequest) {
       monthlyAnnouncements.push({ month: label, count: monthAnns.length })
 
       const monthAccepted = monthAnns
-        .flatMap((a) => a.offers)
+        .flatMap((a) => announcementOffersMap.get(a.id) || [])
         .filter((o) => o.status === 'ACCEPTED')
       const monthRevenue = monthAccepted
         .flatMap((o) => o.items)
@@ -119,17 +155,15 @@ export async function GET(request: NextRequest) {
 
     // ── Logistics leaderboard ─────────────────────────────────────
     const companyMap = new Map<string, { name: string; bids: number; wins: number; prices: number[] }>()
-    for (const ann of announcements) {
-      for (const offer of ann.offers) {
-        const id = offer.logisticsCompany?.id
-        const name = offer.logisticsCompany?.name
-        if (!id || !name) continue
-        if (!companyMap.has(id)) companyMap.set(id, { name, bids: 0, wins: 0, prices: [] })
-        const entry = companyMap.get(id)!
-        entry.bids++
-        if (offer.status === 'ACCEPTED') entry.wins++
-        offer.items.forEach((i) => entry.prices.push(i.price))
-      }
+    for (const offer of offers) {
+      const id = offer.logisticsCompany?.id
+      const name = offer.logisticsCompany?.name
+      if (!id || !name) continue
+      if (!companyMap.has(id)) companyMap.set(id, { name, bids: 0, wins: 0, prices: [] })
+      const entry = companyMap.get(id)!
+      entry.bids++
+      if (offer.status === 'ACCEPTED') entry.wins++
+      offer.items.forEach((i) => entry.prices.push(i.price))
     }
     const logisticsLeaderboard = Array.from(companyMap.values())
       .map((c) => ({
@@ -149,7 +183,8 @@ export async function GET(request: NextRequest) {
       if (!routeMap.has(key)) routeMap.set(key, { count: 0, prices: [], days: [] })
       const r = routeMap.get(key)!
       r.count++
-      const accepted = ann.offers.find((o) => o.status === 'ACCEPTED')
+      const annOffers = announcementOffersMap.get(ann.id) || []
+      const accepted = annOffers.find((o) => o.status === 'ACCEPTED')
       if (accepted) {
         accepted.items.forEach((i) => {
           r.prices.push(i.price)
@@ -174,8 +209,9 @@ export async function GET(request: NextRequest) {
       if (!cargoMap.has(t)) cargoMap.set(t, { count: 0, offerCounts: [], prices: [] })
       const c = cargoMap.get(t)!
       c.count++
-      c.offerCounts.push(ann.offers.length)
-      const accepted = ann.offers.find((o) => o.status === 'ACCEPTED')
+      const annOffers = announcementOffersMap.get(ann.id) || []
+      c.offerCounts.push(annOffers.length)
+      const accepted = annOffers.find((o) => o.status === 'ACCEPTED')
       if (accepted) accepted.items.forEach((i) => c.prices.push(i.price))
     }
     const cargoTypeStats = Array.from(cargoMap.entries())
@@ -192,10 +228,10 @@ export async function GET(request: NextRequest) {
 
     // ── Per-announcement detail ───────────────────────────────────
     const announcementDetail = announcements.map((ann) => {
-      const offers = ann.offers
-      const allItems = offers.flatMap((o) => o.items)
+      const annOffers = announcementOffersMap.get(ann.id) || []
+      const allItems = annOffers.flatMap((o) => o.items)
       const prices = allItems.map((i) => i.price)
-      const accepted = offers.find((o) => o.status === 'ACCEPTED')
+      const accepted = annOffers.find((o) => o.status === 'ACCEPTED')
       const acceptedItems = accepted?.items ?? []
       const acceptedPrice =
         acceptedItems.length > 0 ? Math.min(...acceptedItems.map((i) => i.price)) : null
@@ -209,14 +245,14 @@ export async function GET(request: NextRequest) {
         status: ann.status,
         deadline: ann.deadline,
         createdAt: ann.createdAt,
-        offerCount: offers.length,
-        pendingCount: offers.filter((o) => o.status === 'PENDING').length,
-        acceptedCount: offers.filter((o) => o.status === 'ACCEPTED').length,
+        offerCount: annOffers.length,
+        pendingCount: annOffers.filter((o) => o.status === 'PENDING').length,
+        acceptedCount: annOffers.filter((o) => o.status === 'ACCEPTED').length,
         minPrice: prices.length > 0 ? Math.min(...prices) : null,
         maxPrice: prices.length > 0 ? Math.max(...prices) : null,
         acceptedPrice,
         acceptedCompany: accepted?.logisticsCompany?.name ?? null,
-        offers: offers.map((o) => ({
+        offers: annOffers.map((o) => ({
           id: o.id,
           status: o.status,
           company: o.logisticsCompany?.name,

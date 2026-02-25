@@ -102,7 +102,13 @@
       "CANCELLED": "Cancelled"
     },
     "closeAnnouncement": "Close Announcement",
-    "cancelAnnouncement": "Cancel Announcement"
+    "cancelAnnouncement": "Cancel Announcement",
+    "reactivate": "Reactivate",
+    "tabs": {
+      "active": "Active",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    }
   },
   "offers": {
     "title": "Offers",
@@ -119,11 +125,39 @@
     "removeItem": "Remove",
     "accept": "Accept",
     "reject": "Reject",
+    "download": "Download",
+    "downloadDoc": "Download .doc",
+    "editOffer": "Edit offer",
+    "editOfferTitle": "Edit Offer",
+    "editOfferDescription": "Update your offer details. Changes will be added to the history.",
+    "returnToPending": "Return to pending",
     "createSuccess": "Offer submitted successfully",
     "createError": "Error submitting offer",
     "acceptSuccess": "Offer accepted",
     "rejectSuccess": "Offer rejected",
     "alreadySubmitted": "You have already submitted an offer for this announcement",
+    "submitted": "Submitted",
+    "updated": "Updated",
+    "addAtLeastOne": "Add at least one transport type",
+    "saveError": "Error saving offer",
+    "deliveryPeriod": "Delivery period (days)",
+    "transportNotes": "Notes about this transport type...",
+    "transportNumber": "Transport",
+    "history": {
+      "title": "Change History",
+      "created": "Offer created",
+      "updated": "Offer updated",
+      "statusChanged": "Status changed",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "detailsUpdated": "Offer updated",
+      "notesLabel": "Notes:",
+      "previous": "Previous:",
+      "new": "New:",
+      "empty": "(empty)",
+      "transportTypes": "Transport Types:",
+      "days": "days"
+    },
     "status": {
       "PENDING": "Pending",
       "ACCEPTED": "Accepted",
@@ -270,6 +304,19 @@
     "supplierFeature3": "Choose the best price",
     "logisticsFeature1": "Browse active announcements",
     "logisticsFeature2": "Submit offers for different transport types",
-    "logisticsFeature3": "Grow your business"
+    "logisticsFeature3": "Grow your business",
+    "copyright": "© 2024 LogiConnect. All rights reserved."
+  },
+  "guide": {
+    "title": "Guide",
+    "selectRole": "Select your role",
+    "forSuppliers": "Supplier Companies",
+    "forLogistics": "Logistics Companies"
+  },
+  "export": {
+    "title": "Export",
+    "csv": "CSV",
+    "excel": "Excel",
+    "json": "JSON"
   }
 }

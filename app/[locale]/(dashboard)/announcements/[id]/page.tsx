@@ -212,24 +212,42 @@ export default function AnnouncementDetailPage() {
           )}
 
           {/* ── Owner actions ──────────────────────────────────── */}
-          {isOwner && announcement.status === 'ACTIVE' && (
-            <div className="flex gap-2 pt-4 border-t border-slate-100">
-              <Button
-                variant="outline" size="sm"
-                onClick={() => updateStatus('CLOSED')}
-                disabled={!!updating}
-              >
-                {updating === 'CLOSED' && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
-                {t('closeAnnouncement')}
-              </Button>
-              <Button
-                variant="outline" size="sm"
-                className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
-                onClick={() => updateStatus('CANCELLED')}
-                disabled={!!updating}
-              >
-                {t('cancelAnnouncement')}
-              </Button>
+          {isOwner && (
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100">
+              {announcement.status === 'ACTIVE' && (
+                <>
+                  <Button
+                    variant="outline" size="sm"
+                    onClick={() => updateStatus('CLOSED')}
+                    disabled={!!updating}
+                  >
+                    {updating === 'CLOSED' && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    {t('closeAnnouncement')}
+                  </Button>
+                  <Button
+                    variant="outline" size="sm"
+                    className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                    onClick={() => updateStatus('CANCELLED')}
+                    disabled={!!updating}
+                  >
+                    {t('cancelAnnouncement')}
+                  </Button>
+                </>
+              )}
+
+              {(announcement.status === 'CLOSED' || announcement.status === 'CANCELLED') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
+                  onClick={() => updateStatus('ACTIVE')}
+                  disabled={!!updating}
+                >
+                  {updating === 'ACTIVE' && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                  {t('reactivate')}
+                </Button>
+              )}
             </div>
           )}
 

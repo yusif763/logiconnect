@@ -102,7 +102,13 @@
       "CANCELLED": "Ləğv edildi"
     },
     "closeAnnouncement": "Elanı bağla",
-    "cancelAnnouncement": "Elanı ləğv et"
+    "cancelAnnouncement": "Elanı ləğv et",
+    "reactivate": "Yenidən Aktivləşdir",
+    "tabs": {
+      "active": "Aktiv",
+      "closed": "Bağlanmış",
+      "cancelled": "Ləğv edilmiş"
+    }
   },
   "offers": {
     "title": "Təkliflər",
@@ -119,11 +125,39 @@
     "removeItem": "Çıxar",
     "accept": "Qəbul et",
     "reject": "Rədd et",
+    "download": "Yüklə",
+    "downloadDoc": "Yüklə .doc",
+    "editOffer": "Təklifi redaktə et",
+    "editOfferTitle": "Təklifi Redaktə Et",
+    "editOfferDescription": "Təklifinizin detallarını yeniləyin. Dəyişikliklər tarixçəyə əlavə olunacaq.",
+    "returnToPending": "Gözləməyə qaytar",
     "createSuccess": "Təklif uğurla göndərildi",
     "createError": "Təklif göndərilrkən xəta baş verdi",
     "acceptSuccess": "Təklif qəbul edildi",
     "rejectSuccess": "Təklif rədd edildi",
     "alreadySubmitted": "Bu elan üçün artıq təklif göndərmişsiniz",
+    "submitted": "Göndərildi",
+    "updated": "Yeniləndi",
+    "addAtLeastOne": "Ən azı bir nəqliyyat növü əlavə edin",
+    "saveError": "Təklif yadda saxlanarkən xəta baş verdi",
+    "deliveryPeriod": "Çatdırılma müddəti (gün)",
+    "transportNotes": "Bu nəqliyyat növü haqqında qeydlər...",
+    "transportNumber": "Nəqliyyat",
+    "history": {
+      "title": "Dəyişiklik Tarixçəsi",
+      "created": "Təklif yaradıldı",
+      "updated": "Təklif yeniləndi",
+      "statusChanged": "Status dəyişdirildi",
+      "accepted": "Qəbul edildi",
+      "rejected": "Rədd edildi",
+      "detailsUpdated": "Təklif yeniləndi",
+      "notesLabel": "Qeydlər:",
+      "previous": "Əvvəlki:",
+      "new": "Yeni:",
+      "empty": "(boş)",
+      "transportTypes": "Nəqliyyat Növləri:",
+      "days": "gün"
+    },
     "status": {
       "PENDING": "Gözləyir",
       "ACCEPTED": "Qəbul edildi",
@@ -132,7 +166,7 @@
     "transport": {
       "AIR": "Hava",
       "SEA": "Dəniz",
-      "RAIL": "Dəmiryol",
+      "RAIL": "Dəmir yolu",
       "ROAD": "Avtomobil"
     }
   },
@@ -270,6 +304,19 @@
     "supplierFeature3": "Ən yaxşı qiyməti seçin",
     "logisticsFeature1": "Aktiv elanları görün",
     "logisticsFeature2": "Müxtəlif nəqliyyat növləri üçün təkliflər göndərin",
-    "logisticsFeature3": "Biznesinizi böyüdün"
+    "logisticsFeature3": "Biznesinizi böyüdün",
+    "copyright": "© 2024 LogiConnect. Bütün hüquqlar qorunur."
+  },
+  "guide": {
+    "title": "Təlimat",
+    "selectRole": "Rolunuzu seçin",
+    "forSuppliers": "Təchizatçı Şirkətlər",
+    "forLogistics": "Logistika Şirkətləri"
+  },
+  "export": {
+    "title": "İxrac",
+    "csv": "CSV",
+    "excel": "Excel",
+    "json": "JSON"
   }
 }

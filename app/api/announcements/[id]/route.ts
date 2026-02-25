@@ -10,17 +10,13 @@ export async function GET(
     const session = await auth()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Optimized: Load announcement and offers count separately for better performance
     const announcement = await prisma.announcement.findUnique({
       where: { id: params.id },
       include: {
         supplier: { select: { id: true, name: true, email: true, phone: true } },
-        offers: {
-          include: {
-            logisticsCompany: { select: { id: true, name: true, email: true } },
-            items: true,
-          },
-          orderBy: { createdAt: 'desc' },
-        },
+        createdBy: { select: { id: true, name: true, email: true } },
+        _count: { select: { offers: true } },
       },
     })
 

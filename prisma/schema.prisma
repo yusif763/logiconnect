@@ -23,6 +23,10 @@ model User {
   offerComments        OfferComment[]
   notifications        Notification[]
   reviews              Review[]
+  offerHistoryChanges  OfferHistory[]
+
+  @@index([companyId])
+  @@index([email])
 }
 
 enum Role {
@@ -46,6 +50,11 @@ model Company {
   offers        Offer[]
   reviews       Review[]
   createdAt     DateTime       @default(now())
+
+  @@index([type])
+  @@index([isVerified])
+  @@index([isActive])
+  @@index([type, isVerified, isActive])
 }
 
 enum CompanyType {
@@ -71,6 +80,11 @@ model Announcement {
   createdBy   User?              @relation("AnnouncementCreator", fields: [createdById], references: [id])
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([status, createdAt])
 }
 
 enum AnnouncementStatus {
@@ -90,12 +104,18 @@ model Offer {
   items              OfferItem[]
   shipment           Shipment?
   comments           OfferComment[]
+  history            OfferHistory[]
   submittedById      String?
   submittedBy        User?          @relation("OfferSubmitter", fields: [submittedById], references: [id])
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 
   @@unique([announcementId, logisticsCompanyId])
+  @@index([announcementId])
+  @@index([logisticsCompanyId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([status, createdAt])
 }
 
 enum OfferStatus {
@@ -113,6 +133,8 @@ model OfferItem {
   currency      String        @default("USD")
   deliveryDays  Int
   notes         String?
+
+  @@index([offerId])
 }
 
 enum TransportType {
@@ -130,6 +152,10 @@ model OfferComment {
   author    User     @relation(fields: [authorId], references: [id])
   content   String
   createdAt DateTime @default(now())
+
+  @@index([offerId])
+  @@index([authorId])
+  @@index([createdAt])
 }
 
 model Notification {
@@ -142,6 +168,11 @@ model Notification {
   relatedId String?
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([userId, isRead])
+  @@index([createdAt])
 }
 
 enum NotificationType {
@@ -159,6 +190,9 @@ model Shipment {
   milestones ShipmentMilestone[]
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 enum ShipmentStatus {
@@ -178,6 +212,9 @@ model ShipmentMilestone {
   note       String?
   location   String?
   createdAt  DateTime       @default(now())
+
+  @@index([shipmentId])
+  @@index([createdAt])
 }
 
 model Review {
@@ -195,4 +232,24 @@ model Review {
   updatedAt          DateTime @updatedAt
 
   @@unique([logisticsCompanyId, reviewerId])
+  @@index([logisticsCompanyId])
+  @@index([reviewerId])
+  @@index([createdAt])
+}
+
+model OfferHistory {
+  id            String       @id @default(cuid())
+  offerId       String
+  offer         Offer        @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  action        String       // CREATED, UPDATED, STATUS_CHANGED, ACCEPTED, REJECTED
+  oldStatus     OfferStatus?
+  newStatus     OfferStatus?
+  changedBy     String?
+  changedByUser User?        @relation(fields: [changedBy], references: [id])
+  note          String?
+  createdAt     DateTime     @default(now())
+
+  @@index([offerId])
+  @@index([createdAt])
+  @@index([offerId, createdAt])
 }

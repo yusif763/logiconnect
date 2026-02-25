@@ -7,10 +7,12 @@ import { useParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { OfferStatusBadge } from '@/components/offers/OfferStatusBadge'
-import { ArrowLeft, Loader2, CheckCircle, XCircle, Plane, Ship, Train, Truck, MapPin, Building2, Download } from 'lucide-react'
+import { ArrowLeft, Loader2, CheckCircle, XCircle, Plane, Ship, Train, Truck, MapPin, Building2, Download, Edit } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { OfferComments } from '@/components/offers/OfferComments'
+import { OfferHistory } from '@/components/offers/OfferHistory'
+import { EditOfferModal } from '@/components/offers/EditOfferModal'
 import { downloadOfferDoc } from '@/lib/generate-doc'
 
 const transportIcons: Record<string, any> = {
@@ -29,6 +31,7 @@ export default function OfferDetailPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   const handleDownload = async () => {
     if (!offer) return
@@ -51,6 +54,8 @@ export default function OfferDetailPage() {
   useEffect(() => { fetchOffer() }, [id])
 
   const isOwner = offer?.announcement?.supplier?.id === session?.user.companyId
+  const isLogisticsCompany = offer?.logisticsCompany?.id === session?.user.companyId
+  const canEdit = isLogisticsCompany && offer?.status === 'PENDING'
 
   const updateStatus = async (status: string) => {
     setUpdating(true)
@@ -61,6 +66,15 @@ export default function OfferDetailPage() {
     })
     await fetchOffer()
     setUpdating(false)
+  }
+
+  const handleEditOffer = async (data: { notes?: string; items: any[] }) => {
+    await fetch(`/api/offers/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    await fetchOffer()
   }
 
   if (loading) {
@@ -78,12 +92,20 @@ export default function OfferDetailPage() {
             {tc('back')}
           </Link>
         </Button>
-        <Button variant="outline" size="sm" onClick={handleDownload} disabled={downloading}>
-          {downloading
-            ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-            : <Download className="h-3.5 w-3.5 mr-1.5" />}
-          Download .doc
-        </Button>
+        <div className="flex items-center gap-2">
+          {canEdit && (
+            <Button variant="outline" size="sm" onClick={() => setEditModalOpen(true)}>
+              <Edit className="h-3.5 w-3.5 mr-1.5" />
+              {t('editOffer')}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={handleDownload} disabled={downloading}>
+            {downloading
+              ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              : <Download className="h-3.5 w-3.5 mr-1.5" />}
+            {t('downloadDoc')}
+          </Button>
+        </div>
       </div>
 
       <Card className="overflow-hidden">
@@ -132,27 +154,88 @@ export default function OfferDetailPage() {
 
           <p className="text-xs text-slate-400 mt-4">
             Submitted {format(new Date(offer.createdAt), 'MMM dd, yyyy HH:mm')}
+            {offer.updatedAt && offer.updatedAt !== offer.createdAt && (
+              <span className="ml-2 text-orange-500">
+                · Updated {format(new Date(offer.updatedAt), 'MMM dd, HH:mm')}
+              </span>
+            )}
           </p>
 
-          {isOwner && offer.status === 'PENDING' && (
-            <div className="flex gap-3 mt-4 pt-4 border-t">
-              <Button
-                className="bg-green-600 hover:bg-green-700 flex-1"
-                onClick={() => updateStatus('ACCEPTED')}
-                disabled={updating}
-              >
-                {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-                {t('accept')}
-              </Button>
-              <Button
-                variant="outline"
-                className="text-red-600 border-red-200 hover:bg-red-50 flex-1"
-                onClick={() => updateStatus('REJECTED')}
-                disabled={updating}
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                {t('reject')}
-              </Button>
+          {isOwner && (
+            <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t">
+              {offer.status === 'PENDING' && (
+                <>
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 flex-1"
+                    onClick={() => updateStatus('ACCEPTED')}
+                    disabled={updating}
+                  >
+                    {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}
+                    {t('accept')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="text-red-600 border-red-200 hover:bg-red-50 flex-1"
+                    onClick={() => updateStatus('REJECTED')}
+                    disabled={updating}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {t('reject')}
+                  </Button>
+                </>
+              )}
+
+              {offer.status === 'ACCEPTED' && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                    onClick={() => updateStatus('PENDING')}
+                    disabled={updating}
+                  >
+                    {updating && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    {t('returnToPending')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={() => updateStatus('REJECTED')}
+                    disabled={updating}
+                  >
+                    {updating && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                    {t('reject')}
+                  </Button>
+                </>
+              )}
+
+              {offer.status === 'REJECTED' && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                    onClick={() => updateStatus('PENDING')}
+                    disabled={updating}
+                  >
+                    {updating && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    {t('returnToPending')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-green-600 border-green-200 hover:bg-green-50"
+                    onClick={() => updateStatus('ACCEPTED')}
+                    disabled={updating}
+                  >
+                    {updating && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                    {t('accept')}
+                  </Button>
+                </>
+              )}
             </div>
           )}
 
@@ -163,6 +246,19 @@ export default function OfferDetailPage() {
           />
         </CardContent>
       </Card>
+
+      {/* History */}
+      <OfferHistory offerId={id} />
+
+      {/* Edit Modal */}
+      {offer && (
+        <EditOfferModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          offer={offer}
+          onSave={handleEditOffer}
+        />
+      )}
     </div>
   )
 }

@@ -15,6 +15,7 @@ import {
   Shield,
   Package,
   Truck,
+  BookOpen,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -76,6 +77,13 @@ export function Sidebar({ role, locale, isCompanyAdmin = false }: SidebarProps) 
       label: t('profile'),
       icon: User,
       roles: ['ADMIN', 'SUPPLIER_EMPLOYEE', 'LOGISTICS_EMPLOYEE'],
+      requiresCompanyAdmin: false,
+    },
+    {
+      href: '/guide',
+      label: 'Təlimat',
+      icon: BookOpen,
+      roles: ['SUPPLIER_EMPLOYEE', 'LOGISTICS_EMPLOYEE'],
       requiresCompanyAdmin: false,
     },
   ]

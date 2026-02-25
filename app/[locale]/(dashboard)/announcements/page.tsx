@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import { AnnouncementCard } from '@/components/announcements/AnnouncementCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Search, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -20,11 +21,12 @@ export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState({ origin: '', destination: '', cargoType: '' })
+  const [activeTab, setActiveTab] = useState('ACTIVE')
 
   const isSupplier = session?.user.role === 'SUPPLIER_EMPLOYEE'
   const isLogistics = session?.user.role === 'LOGISTICS_EMPLOYEE'
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = async (status?: string) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -32,6 +34,7 @@ export default function AnnouncementsPage() {
       if (search.origin) params.set('origin', search.origin)
       if (search.destination) params.set('destination', search.destination)
       if (search.cargoType) params.set('cargoType', search.cargoType)
+      if (status) params.set('status', status)
 
       const res = await fetch(`/api/announcements?${params}`)
       const data = await res.json()
@@ -42,14 +45,18 @@ export default function AnnouncementsPage() {
   }
 
   useEffect(() => {
-    if (session) fetchAnnouncements()
-  }, [session])
+    if (session) fetchAnnouncements(activeTab)
+  }, [session, activeTab])
 
-  const handleSearch = () => fetchAnnouncements()
+  const handleSearch = () => fetchAnnouncements(activeTab)
 
   const handleReset = () => {
     setSearch({ origin: '', destination: '', cargoType: '' })
-    setTimeout(fetchAnnouncements, 0)
+    setTimeout(() => fetchAnnouncements(activeTab), 0)
+  }
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
   }
 
   return (
@@ -70,6 +77,17 @@ export default function AnnouncementsPage() {
           </Button>
         )}
       </div>
+
+      {/* Tabs for Supplier */}
+      {isSupplier && (
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsTrigger value="ACTIVE">{t('tabs.active')}</TabsTrigger>
+            <TabsTrigger value="CLOSED">{t('tabs.closed')}</TabsTrigger>
+            <TabsTrigger value="CANCELLED">{t('tabs.cancelled')}</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-slate-200 p-4">

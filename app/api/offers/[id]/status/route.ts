@@ -29,11 +29,26 @@ export async function PATCH(
 
     const { status } = await request.json()
 
-    if (!['ACCEPTED', 'REJECTED'].includes(status)) {
+    if (!['PENDING', 'ACCEPTED', 'REJECTED'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
+    // Allow changing status even if already accepted/rejected
+    // This gives flexibility to suppliers to change their mind
+
     const result = await prisma.$transaction(async (tx: any) => {
+      // Create history record
+      await tx.offerHistory.create({
+        data: {
+          offerId: params.id,
+          action: 'STATUS_CHANGED',
+          oldStatus: offer.status,
+          newStatus: status,
+          changedBy: session.user.id,
+          note: `Status changed from ${offer.status} to ${status}`,
+        },
+      })
+
       const updatedOffer = await tx.offer.update({
         where: { id: params.id },
         data: { status },
@@ -41,6 +56,38 @@ export async function PATCH(
 
       // If accepted, close the announcement and create a shipment
       if (status === 'ACCEPTED') {
+        // Reject all other pending offers for this announcement
+        const rejectedOffers = await tx.offer.findMany({
+          where: {
+            announcementId: offer.announcement.id,
+            id: { not: params.id },
+            status: 'PENDING',
+          },
+        })
+
+        for (const rejectedOffer of rejectedOffers) {
+          await tx.offerHistory.create({
+            data: {
+              offerId: rejectedOffer.id,
+              action: 'STATUS_CHANGED',
+              oldStatus: 'PENDING',
+              newStatus: 'REJECTED',
+              changedBy: session.user.id,
+              note: 'Auto-rejected: Another offer was accepted',
+            },
+          })
+        }
+
+        await tx.offer.updateMany({
+          where: {
+            announcementId: offer.announcement.id,
+            id: { not: params.id },
+            status: 'PENDING',
+          },
+          data: { status: 'REJECTED' },
+        })
+
+        // Close the announcement
         await tx.announcement.update({
           where: { id: offer.announcement.id },
           data: { status: 'CLOSED' },
