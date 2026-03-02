@@ -294,35 +294,62 @@ export default function AnnouncementDetailPage() {
         </div>
       </div>
 
-      {/* ── Offers Section (supplier/admin) ───────────────────── */}
-      {(isOwner || session?.user.role === 'ADMIN') && (
+      {/* ── Offers Section (supplier/admin/logistics) ───────────────────── */}
+      {(isOwner || session?.user.role === 'ADMIN' || isLogistics) && (
         <div>
           <div className="flex items-center gap-2 mb-4">
             <FileText className="h-5 w-5 text-slate-500" />
             <h2 className="text-lg font-semibold text-slate-900">
-              Offers
+              {isLogistics && !isOwner && session?.user.role !== 'ADMIN' ? 'My Offer' : 'Offers'}
               <span className="ml-2 text-sm font-normal text-slate-400">
-                ({announcement.offers?.length ?? 0})
+                ({
+                  isLogistics && !isOwner && session?.user.role !== 'ADMIN'
+                    ? announcement.offers?.filter((o: any) => o.logisticsCompanyId === session?.user.companyId).length ?? 0
+                    : announcement.offers?.length ?? 0
+                })
               </span>
             </h2>
           </div>
 
-          {(!announcement.offers || announcement.offers.length === 0) ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-12 text-center">
-              <FileText className="h-8 w-8 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 font-medium">No offers yet</p>
-              <p className="text-sm text-slate-400 mt-1">Logistics companies will submit offers here</p>
-            </div>
-          ) : (
+          {(() => {
+            const visibleOffers = announcement.offers?.filter((offer: any) => {
+              if (isLogistics && !isOwner && session?.user.role !== 'ADMIN') {
+                return offer.logisticsCompanyId === session?.user.companyId
+              }
+              return true
+            }) || []
+
+            if (visibleOffers.length === 0) {
+              return (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-12 text-center">
+                  <FileText className="h-8 w-8 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 font-medium">
+                    {isLogistics && !isOwner && session?.user.role !== 'ADMIN'
+                      ? 'You haven\'t submitted an offer yet'
+                      : 'No offers yet'}
+                  </p>
+                  <p className="text-sm text-slate-400 mt-1">
+                    {isLogistics && !isOwner && session?.user.role !== 'ADMIN'
+                      ? 'Submit your offer using the button above'
+                      : 'Logistics companies will submit offers here'}
+                  </p>
+                </div>
+              )
+            }
+
+            return (
             <Tabs defaultValue="cards">
-              <TabsList className="mb-4">
-                <TabsTrigger value="cards">Cards</TabsTrigger>
-                <TabsTrigger value="compare">Compare Offers</TabsTrigger>
-              </TabsList>
+              {/* Only show Compare tab to suppliers and admins */}
+              {(isOwner || session?.user.role === 'ADMIN') && (
+                <TabsList className="mb-4">
+                  <TabsTrigger value="cards">Cards</TabsTrigger>
+                  <TabsTrigger value="compare">Compare Offers</TabsTrigger>
+                </TabsList>
+              )}
 
               <TabsContent value="cards">
                 <div className="space-y-4">
-                  {announcement.offers.map((offer: any) => (
+                  {visibleOffers.map((offer: any) => (
                     <div
                       key={offer.id}
                       className={cn(
@@ -435,20 +462,24 @@ export default function AnnouncementDetailPage() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="compare">
-                <div className="rounded-2xl border border-slate-200 overflow-hidden">
-                  <OfferComparisonTable
-                    offers={announcement.offers}
-                    isOwner={isOwner}
-                    announcementStatus={announcement.status}
-                    onOfferUpdate={async (offerId, status) => {
-                      await updateOfferStatus(offerId, status)
-                    }}
-                  />
-                </div>
-              </TabsContent>
+              {/* Compare tab - only for suppliers and admins */}
+              {(isOwner || session?.user.role === 'ADMIN') && (
+                <TabsContent value="compare">
+                  <div className="rounded-2xl border border-slate-200 overflow-hidden">
+                    <OfferComparisonTable
+                      offers={announcement.offers}
+                      isOwner={isOwner}
+                      announcementStatus={announcement.status}
+                      onOfferUpdate={async (offerId, status) => {
+                        await updateOfferStatus(offerId, status)
+                      }}
+                    />
+                  </div>
+                </TabsContent>
+              )}
             </Tabs>
-          )}
+            )
+          })()}
         </div>
       )}
     </div>
