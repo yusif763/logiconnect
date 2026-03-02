@@ -58,7 +58,9 @@
     "registerSuccess": "Registration completed successfully",
     "awaitingVerification": "Your account is awaiting verification. You will gain full access once approved by an administrator.",
     "supplierDesc": "Create cargo announcements and receive offers from logistics companies",
-    "logisticsDesc": "Browse active announcements and submit competitive offers"
+    "logisticsDesc": "Browse active announcements and submit competitive offers",
+    "isLogistics": "Are you a logistics company?",
+    "isSupplier": "Are you a supplier company?"
   },
   "dashboard": {
     "welcome": "Welcome",

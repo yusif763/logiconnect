@@ -23,10 +23,10 @@ export default async function PresentationPage({
       {/* Header */}
       <header className="border-b border-white/10 backdrop-blur-sm sticky top-0 z-50 bg-slate-900/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href={`/${locale}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Package className="h-7 w-7 text-blue-400" />
             <span className="font-bold text-xl text-white">LogiConnect</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
             <Link href={`/${locale}/login`}>
               <Button variant="ghost" className="text-white hover:text-white hover:bg-white/10">

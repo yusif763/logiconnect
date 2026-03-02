@@ -55,10 +55,10 @@ export default function RegisterSupplierPage({ params: { locale } }: { params: {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <Link href={`/${locale}`} className="flex items-center justify-center gap-2 mb-2 hover:opacity-80 transition-opacity">
             <Package className="h-8 w-8 text-blue-400" />
             <span className="font-bold text-2xl text-white">LogiConnect</span>
-          </div>
+          </Link>
           <p className="text-slate-400 text-sm">{t('supplierDesc')}</p>
         </div>
 
@@ -136,12 +136,20 @@ export default function RegisterSupplierPage({ params: { locale } }: { params: {
               </Button>
             </form>
 
-            <p className="mt-4 text-center text-sm text-slate-600">
-              {t('hasAccount')}{' '}
-              <Link href={`/${locale}/login`} className="text-blue-600 hover:underline font-medium">
-                {t('login')}
-              </Link>
-            </p>
+            <div className="mt-4 space-y-2">
+              <p className="text-center text-sm text-slate-600">
+                {t('hasAccount')}{' '}
+                <Link href={`/${locale}/login`} className="text-blue-600 hover:underline font-medium">
+                  {t('login')}
+                </Link>
+              </p>
+              <p className="text-center text-sm text-slate-600">
+                {t('isLogistics')}{' '}
+                <Link href={`/${locale}/register/logistics`} className="text-green-600 hover:underline font-medium">
+                  {t('registerLogistics')}
+                </Link>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

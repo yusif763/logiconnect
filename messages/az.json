@@ -58,7 +58,9 @@
     "registerSuccess": "Qeydiyyat uğurla tamamlandı",
     "awaitingVerification": "Hesabınız yoxlanma gözləyir. Admin tərəfindən təsdiqlənəndən sonra bütün funksiyalara giriş əldə edəcəksiniz.",
     "supplierDesc": "Yük elanları yaradın və logistika şirkətlərindən təkliflər alın",
-    "logisticsDesc": "Aktiv elanları görün və rəqabətli təkliflər göndərin"
+    "logisticsDesc": "Aktiv elanları görün və rəqabətli təkliflər göndərin",
+    "isLogistics": "Logistika şirkətisinizsə?",
+    "isSupplier": "Təchizatçı şirkətisinizsə?"
   },
   "dashboard": {
     "welcome": "Xoş gəldiniz",

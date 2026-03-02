@@ -48,10 +48,10 @@ export default function LoginPage({ params: { locale } }: { params: { locale: st
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
+          <Link href={`/${locale}`} className="flex items-center justify-center gap-2 mb-4 hover:opacity-80 transition-opacity">
             <Package className="h-8 w-8 text-blue-400" />
             <span className="font-bold text-2xl text-white">LogiConnect</span>
-          </div>
+          </Link>
         </div>
 
         <Card className="border-0 shadow-2xl">

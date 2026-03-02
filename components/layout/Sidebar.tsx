@@ -116,10 +116,10 @@ export function Sidebar({ role, locale, isCompanyAdmin = false }: SidebarProps) 
 
   return (
     <div className="flex flex-col h-full bg-slate-900 text-white w-64 custom-scrollbar overflow-y-auto">
-      <div className="flex items-center gap-2 p-6 border-b border-slate-700 bg-gradient-to-r from-blue-600 to-blue-700">
+      <Link href={`/${locale}`} className="flex items-center gap-2 p-6 border-b border-slate-700 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all cursor-pointer">
         <Package className="h-6 w-6 text-white" />
         <span className="font-bold text-lg text-white">LogiConnect</span>
-      </div>
+      </Link>
 
       <nav className="flex-1 p-4 space-y-1 animate-slide-up">
         {filteredNav.map((item, index) => (
