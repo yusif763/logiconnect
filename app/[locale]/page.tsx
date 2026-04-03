@@ -28,6 +28,12 @@ export default async function PresentationPage({
                         <span className="font-bold text-xl text-white">LogiConnect</span>
                     </Link>
                     <div className="flex items-center gap-3">
+                        <Link href={locale === 'az' ? '/en' : '/az'}>
+                            <Button variant="outline" className="gap-2 border-white/20 text-white hover:bg-white/10 bg-[transparent]">
+                                <Globe className="h-4 w-4" />
+                                {locale === 'az' ? 'EN' : 'AZ'}
+                            </Button>
+                        </Link>
                         <Link href={`/${locale}/login`}>
                             <Button variant="ghost" className="text-white hover:text-white hover:bg-white/10">
                                 {ta('login')}
